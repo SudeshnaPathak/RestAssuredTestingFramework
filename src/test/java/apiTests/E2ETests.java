@@ -1,9 +1,11 @@
 package apiTests;
 
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import pojos.AddBookPojo;
 import pojos.DeleteBookPojo;
 
@@ -20,16 +22,21 @@ public class E2ETests extends BaseClass{
 	String baseUrl = "https://bookstore.toolsqa.com";
 	String userId = "3c9a82fe-5d8a-44e2-80c6-4239d83556fa";
 	String bookId;
-
+	
+	private RequestSpecification requestSpec()
+	{
+		return given()
+			   .contentType("application/json")
+			   .baseUri(baseUrl)
+			   .relaxedHTTPSValidation();
+	}
+	
 	@Test
 	public void GetBooks()
 	{
-		Response res = given()
-			.contentType("application/json")
-			.baseUri(baseUrl)
-			.relaxedHTTPSValidation()
-		.when()
-			.get("/BookStore/v1/Books");
+		Response res = requestSpec()
+						.when()
+						.get("/BookStore/v1/Books");
 		
 		res.then()
 			.statusCode(200)
@@ -47,28 +54,22 @@ public class E2ETests extends BaseClass{
 		List<Map<String, String>> collectionOfIsbns = new ArrayList<>();
 		collectionOfIsbns.add(Map.of("isbn", bookId));
 		AddBookPojo payload = new AddBookPojo(userId, collectionOfIsbns);
-		given()
-			.contentType("application/json")
+		
+		requestSpec()
 			.auth().oauth2(accessToken)
-			.baseUri(baseUrl)
-			.relaxedHTTPSValidation()
 			.body(payload)
 		.when()
 			.post("/BookStore/v1/Books")
 		.then()
-			.statusCode(anyOf(is(400), is(201)))
-			.log().all();
+			.statusCode(anyOf(is(400), is(201)));
 	}
 	
 	@Test(dependsOnMethods = "AddBook")
 	public void DeleteBook()
 	{
 		DeleteBookPojo payload = new DeleteBookPojo(bookId, userId);
-		given()
-			.contentType("application/json")
+		requestSpec()
 			.auth().oauth2(accessToken)
-			.baseUri(baseUrl)
-			.relaxedHTTPSValidation()
 			.body(payload)
        .when()
 			.delete("/BookStore/v1/Book")
@@ -80,11 +81,8 @@ public class E2ETests extends BaseClass{
 	@Test(dependsOnMethods = "DeleteBook")
 	public void getUser()
 	{
-		Response res = given()
-				.contentType("application/json")
+		Response res = requestSpec()
 				.auth().oauth2(accessToken)
-				.baseUri(baseUrl)
-				.relaxedHTTPSValidation()
 				.pathParam("UUID", userId)
 		.when()
 			.get("/Account/v1/User/{UUID}");
@@ -94,7 +92,7 @@ public class E2ETests extends BaseClass{
 			.log().all();
 		
 		List<String> isbnList = res.jsonPath().getList("books.isbn");
-		Assert.assertFalse(isbnList.contains(bookId));
+		Assert.assertFalse(isbnList.contains(bookId)); //Book should not be contained in the list post deletion
 	}
 
 }
