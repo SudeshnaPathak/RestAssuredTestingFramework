@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="4" passed="4" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2026-03-17T21:37:20 IST" name="Default suite" finished-at="2026-03-17T21:37:31 IST" duration-ms="11124">
+    <groups>
+    </groups>
+    <test started-at="2026-03-17T21:37:20 IST" name="Default test" finished-at="2026-03-17T21:37:31 IST" duration-ms="11124">
+      <class name="apiTests.E2ETests">
+        <test-method is-config="true" signature="setup()[pri:0, instance:apiTests.E2ETests@4802796d]" started-at="2026-03-17T21:37:20 IST" name="setup" finished-at="2026-03-17T21:37:26 IST" duration-ms="6218" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method signature="GetBooks()[pri:0, instance:apiTests.E2ETests@4802796d]" started-at="2026-03-17T21:37:27 IST" name="GetBooks" finished-at="2026-03-17T21:37:27 IST" duration-ms="906" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- GetBooks -->
+        <test-method signature="AddBook()[pri:0, instance:apiTests.E2ETests@4802796d]" started-at="2026-03-17T21:37:27 IST" name="AddBook" finished-at="2026-03-17T21:37:28 IST" depends-on-methods="apiTests.E2ETests.GetBooks" duration-ms="918" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- AddBook -->
+        <test-method signature="DeleteBook()[pri:0, instance:apiTests.E2ETests@4802796d]" started-at="2026-03-17T21:37:28 IST" name="DeleteBook" finished-at="2026-03-17T21:37:29 IST" depends-on-methods="apiTests.E2ETests.AddBook" duration-ms="1008" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- DeleteBook -->
+        <test-method signature="getUser()[pri:0, instance:apiTests.E2ETests@4802796d]" started-at="2026-03-17T21:37:29 IST" name="getUser" finished-at="2026-03-17T21:37:31 IST" depends-on-methods="apiTests.E2ETests.DeleteBook" duration-ms="1985" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- getUser -->
+      </class> <!-- apiTests.E2ETests -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>
