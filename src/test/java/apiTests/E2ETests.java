@@ -19,8 +19,6 @@ import java.util.Map;
 
 //E2E Flow : get → add → delete → verify
 public class E2ETests extends BaseClass{
-	String baseUrl = "https://bookstore.toolsqa.com";
-	String userId = "3c9a82fe-5d8a-44e2-80c6-4239d83556fa";
 	String bookId;
 	
 	private RequestSpecification requestSpec()

@@ -7,9 +7,9 @@ import org.testng.annotations.BeforeClass;
 
 import io.restassured.response.Response;
 import pojos.UserPojo;
+import utils.ReadDataFromPropertiesFile;
 
-public class BaseClass {
-	String baseUrl = "https://bookstore.toolsqa.com";
+public class BaseClass extends ReadDataFromPropertiesFile{
 	UserPojo user;
 	String accessToken;
 	
@@ -21,7 +21,7 @@ public class BaseClass {
 	
 	public void RegisterUser()
 	{	
-		user = new UserPojo("Sudeshna", "Sudeshna@12");
+		user = new UserPojo(userName, password);
 		
 		Response res = given()
 			.contentType("application/json")
