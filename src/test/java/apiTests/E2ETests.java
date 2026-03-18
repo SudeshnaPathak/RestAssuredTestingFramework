@@ -1,7 +1,6 @@
 package apiTests;
 
 import org.testng.Assert;
-import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 import io.restassured.response.Response;
@@ -41,12 +40,12 @@ public class E2ETests extends BaseClass{
 			.log().all();
 		
 		List<Map<String, String>> books = res.jsonPath().getList("books");
-		Assert.assertTrue(books.size() > 0);
+        Assert.assertFalse(books.isEmpty());
 		int idx = (int) (Math.random() * books.size());
 		bookId = books.get(idx).get("isbn");
 	}
 	
-	@Test(dependsOnMethods = "GetBooks")
+	@Test(dependsOnMethods = {"GetBooks"})
 	public void AddBook()
 	{
 		List<Map<String, String>> collectionOfIsbns = new ArrayList<>();
@@ -59,10 +58,11 @@ public class E2ETests extends BaseClass{
 		.when()
 			.post("/BookStore/v1/Books")
 		.then()
-			.statusCode(anyOf(is(400), is(201)));
+			.statusCode(anyOf(is(400), is(201)))
+			.log().all();
 	}
 	
-	@Test(dependsOnMethods = "AddBook")
+	@Test(dependsOnMethods = {"AddBook"})
 	public void DeleteBook()
 	{
 		DeleteBookPojo payload = new DeleteBookPojo(bookId, userId);
@@ -76,7 +76,7 @@ public class E2ETests extends BaseClass{
 			.log().all();
 	}
 	
-	@Test(dependsOnMethods = "DeleteBook")
+	@Test(dependsOnMethods = {"DeleteBook"})
 	public void getUser()
 	{
 		Response res = requestSpec()

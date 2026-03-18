@@ -16,7 +16,7 @@ public class ReadDataFromPropertiesFile {
 	@BeforeSuite
 	public static void fetchData() throws IOException{
 		
-		FileInputStream fis = new FileInputStream("C:\\Users\\Sudeshna Pathak\\eclipse-workspace\\RestAssuredTestingFramework\\src\\test\\resources\\configData\\configData.properties");
+		FileInputStream fis = new FileInputStream("src/test/resources/configData/configData.properties");
 		Properties p = new Properties();
 		p.load(fis);
 		

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite name="All Test Suite"
+><test verbose="2" preserve-order="true" name="C:/Users/Sudeshna Pathak/eclipse-workspace/RestAssuredTestingFramework/src/test/java/apiTests/E2ETests.java">
+<classes>
+<class name="apiTests.E2ETests">
+<methods>
+    <include name="GetBooks"/>
+    <include name="AddBook"/>
+    <include name="DeleteBook"/>
+    <include name="getUser"/>
+</methods>
+</class>
+</classes>
+</test>
+</suite>
