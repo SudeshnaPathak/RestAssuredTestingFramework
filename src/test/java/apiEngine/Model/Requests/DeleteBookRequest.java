@@ -1,11 +1,11 @@
-package pojos;
+package apiEngine.Model.Requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class DeleteBookPojo {
+public class DeleteBookRequest {
 	private String isbn;
 	private String userId;
 

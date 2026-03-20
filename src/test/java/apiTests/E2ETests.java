@@ -1,20 +1,20 @@
 package apiTests;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
+import apiEngine.Model.Book;
+import apiEngine.Model.Requests.AddBookRequest;
+import apiEngine.Model.Requests.DeleteBookRequest;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import pojos.AddBookPojo;
-import pojos.DeleteBookPojo;
-
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.is;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
 
 //E2E Flow : get → add → delete → verify
 public class E2ETests extends BaseClass{
@@ -38,11 +38,13 @@ public class E2ETests extends BaseClass{
 		res.then()
 			.statusCode(200)
 			.log().all();
-		
-		List<Map<String, String>> books = res.jsonPath().getList("books");
+
+//		List<Map<String, String>> books = res.jsonPath().getList("books");
+		List<Book> books = res.jsonPath().getList("books", Book.class);
         Assert.assertFalse(books.isEmpty());
 		int idx = (int) (Math.random() * books.size());
-		bookId = books.get(idx).get("isbn");
+//		bookId = books.get(idx).get("isbn");
+		bookId = books.get(idx).getIsbn();
 	}
 	
 	@Test(dependsOnMethods = {"GetBooks"})
@@ -50,7 +52,7 @@ public class E2ETests extends BaseClass{
 	{
 		List<Map<String, String>> collectionOfIsbns = new ArrayList<>();
 		collectionOfIsbns.add(Map.of("isbn", bookId));
-		AddBookPojo payload = new AddBookPojo(userId, collectionOfIsbns);
+		AddBookRequest payload = new AddBookRequest(userId, collectionOfIsbns);
 		
 		requestSpec()
 			.auth().oauth2(accessToken)
@@ -65,7 +67,7 @@ public class E2ETests extends BaseClass{
 	@Test(dependsOnMethods = {"AddBook"})
 	public void DeleteBook()
 	{
-		DeleteBookPojo payload = new DeleteBookPojo(bookId, userId);
+		DeleteBookRequest payload = new DeleteBookRequest(bookId, userId);
 		requestSpec()
 			.auth().oauth2(accessToken)
 			.body(payload)

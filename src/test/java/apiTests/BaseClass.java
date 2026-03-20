@@ -1,16 +1,16 @@
 package apiTests;
 
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
-
-import org.testng.annotations.BeforeClass;
-
+import apiEngine.Model.Requests.AuthorizationRequest;
 import io.restassured.response.Response;
-import pojos.UserPojo;
+import org.testng.annotations.BeforeClass;
 import utils.ReadDataFromPropertiesFile;
 
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+
 public class BaseClass extends ReadDataFromPropertiesFile{
-	UserPojo user;
+	AuthorizationRequest user;
 	String accessToken;
 	
 	@BeforeClass
@@ -19,9 +19,8 @@ public class BaseClass extends ReadDataFromPropertiesFile{
 	    generateToken();
 	}
 	
-	public void RegisterUser()
-	{	
-		user = new UserPojo(userName, password);
+	public void RegisterUser() {
+		user = new AuthorizationRequest(userName, password);
 		
 		Response res = given()
 			.contentType("application/json")

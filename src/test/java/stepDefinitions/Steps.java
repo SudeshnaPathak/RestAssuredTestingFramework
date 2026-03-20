@@ -1,5 +1,11 @@
 package stepDefinitions;
 
+import apiEngine.Model.Book;
+import apiEngine.Model.Requests.AddBookRequest;
+import apiEngine.Model.Requests.AuthorizationRequest;
+import apiEngine.Model.Requests.DeleteBookRequest;
+import apiEngine.Model.Responses.TokenResponse;
+import apiEngine.Model.Responses.UserAccount;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -7,9 +13,6 @@ import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.testng.Assert;
-import pojos.AddBookPojo;
-import pojos.DeleteBookPojo;
-import pojos.UserPojo;
 import utils.ReadDataFromPropertiesFile;
 
 import java.io.IOException;
@@ -23,9 +26,9 @@ import static utils.ReadDataFromPropertiesFile.*;
 
 public class Steps{
 
-    String accessToken;
+    private static TokenResponse tokenResponse;
     String bookId;
-    Response res;
+    private static Response res;
 
     @Before
     public void setup() throws IOException {
@@ -41,7 +44,7 @@ public class Steps{
     @Given("The user is authorized")
     public void the_user_is_authorized() {
 
-        UserPojo user = new UserPojo(userName, password);
+        AuthorizationRequest user = new AuthorizationRequest(userName, password);
         res = requestSpec()
                 .body(user)
                 .when()
@@ -53,7 +56,7 @@ public class Steps{
                 .body("result", equalTo("User authorized successfully."))
                 .log().all();
 
-        accessToken = res.path("token");
+        tokenResponse = res.getBody().as(TokenResponse.class);
     }
 
     @Given("A list of book is available")
@@ -67,20 +70,20 @@ public class Steps{
                 .statusCode(200)
                 .log().all();
 
-        List<Map<String, String>> books = res.jsonPath().getList("books");
+        List<Book> books = res.jsonPath().getList("books", Book.class);
         Assert.assertFalse(books.isEmpty());
         int idx = (int) (Math.random() * books.size());
-        bookId = books.get(idx).get("isbn");
+        bookId = books.get(idx).getIsbn();
     }
 
     @When("User adds a book to his reading list")
     public void user_adds_a_book_to_his_reading_list() {
         List<Map<String, String>> collectionOfIsbns = new ArrayList<>();
         collectionOfIsbns.add(Map.of("isbn", bookId));
-        AddBookPojo payload = new AddBookPojo(userId, collectionOfIsbns);
+        AddBookRequest payload = new AddBookRequest(userId, collectionOfIsbns);
 
         res = requestSpec()
-                .auth().oauth2(accessToken)
+                .auth().oauth2(tokenResponse.getToken())
                 .body(payload)
                 .when()
                 .post("/BookStore/v1/Books");
@@ -105,9 +108,9 @@ public class Steps{
 
     @When("User removes a book from his reading list")
     public void user_removes_a_book_from_his_reading_list() {
-        DeleteBookPojo payload = new DeleteBookPojo(bookId, userId);
+        DeleteBookRequest payload = new DeleteBookRequest(bookId, userId);
         requestSpec()
-                .auth().oauth2(accessToken)
+                .auth().oauth2(tokenResponse.getToken())
                 .body(payload)
                 .when()
                 .delete("/BookStore/v1/Book")
@@ -119,7 +122,7 @@ public class Steps{
     @Then("The book is removed")
     public void the_book_is_removed() {
         res = requestSpec()
-                .auth().oauth2(accessToken)
+                .auth().oauth2(tokenResponse.getToken())
                 .pathParam("UUID", userId)
                 .when()
                 .get("/Account/v1/User/{UUID}");
@@ -127,6 +130,10 @@ public class Steps{
         res.then()
                 .statusCode(200)
                 .log().all();
+
+        UserAccount userAccount = res.getBody().as(UserAccount.class);
+        List<Book> books = userAccount.getBooks();
+        Assert.assertFalse(books.stream().anyMatch(book -> book.getIsbn().equals(bookId))); //Book should not be contained in the list post deletion
 
         List<String> isbnList = res.jsonPath().getList("books.isbn");
         Assert.assertFalse(isbnList.contains(bookId)); //Book should not be contained in the list post deletion
