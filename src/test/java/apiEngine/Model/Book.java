@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Book {
-    public String isbn;
-    public String title;
-    public String subTitle;
-    public String author;
-    public String publish_date1;
-    public String publisher;
-    public Integer pages;
-    public String description;
-    public String website;
+    private String isbn;
+    private String title;
+    private String subTitle;
+    private String author;
+    private String publish_date;
+    private String publisher;
+    private Integer pages;
+    private String description;
+    private String website;
 }
