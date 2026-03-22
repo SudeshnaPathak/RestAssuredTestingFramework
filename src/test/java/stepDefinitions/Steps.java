@@ -1,20 +1,21 @@
 package stepDefinitions;
 
 import apiEngine.ApiService;
+import apiEngine.IRestResponse;
 import apiEngine.Model.Book;
 import apiEngine.Model.Requests.AddBookRequest;
 import apiEngine.Model.Requests.AuthorizationRequest;
 import apiEngine.Model.Requests.DeleteBookRequest;
+import apiEngine.Model.Responses.BooksResponse;
 import apiEngine.Model.Responses.TokenResponse;
-import io.cucumber.java.Before;
+import apiEngine.Model.Responses.UserAccount;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import org.testng.Assert;
-import utils.ReadDataFromPropertiesFile;
 
-import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,39 +29,35 @@ public class Steps {
     String bookId;
     private static Response res;
 
-    @Before
-    public void setup() throws IOException {
-        ReadDataFromPropertiesFile.fetchData();
-    }
-
     @Given("The user is authorized")
     public void the_user_is_authorized() {
 
         AuthorizationRequest user = new AuthorizationRequest(userName, password);
+        IRestResponse<TokenResponse> res = ApiService.authenticateUserResponse(user);
 
-        res = ApiService.authenticateUserResponse(user);
-        res.then()
-                .statusCode(200)
-                .body("token", notNullValue())
-                .body("result", equalTo("User authorized successfully."))
-                .log().all();
+        Assert.assertTrue(res.isSuccessful(), "Response unsuccessful");
+        Assert.assertEquals(res.getStatusCode(), 200, "Expected 200 OK");
 
-        tokenResponse = res.getBody().as(TokenResponse.class);
+        tokenResponse = res.getBody();
+        Assert.assertNotNull(tokenResponse.getToken(), "Token is null");
+        Assert.assertEquals(tokenResponse.getStatus(), "Success", "Unexpected status");
+        Assert.assertEquals(tokenResponse.getResult(), "User authorized successfully.", "Unexpected result message");
+
+        LocalDateTime expiry = tokenResponse.getExpires();
+        Assert.assertNotNull(expiry, "Expiry time should not be null");
+        Assert.assertTrue(expiry.isAfter(LocalDateTime.now()), "Token is expired");
     }
 
     @Given("A list of book is available")
     public void a_list_of_book_is_available() {
 
-        res = ApiService.getBooks();
-        res.then()
-                .statusCode(200)
-                .log().all();
+        IRestResponse<BooksResponse> res = ApiService.getBooks();
+        Assert.assertTrue(res.isSuccessful(), "Response unsuccessful");
+        Assert.assertEquals(res.getStatusCode(), 200, "Expected 200 OK");
 
-        //List<Map<String, String>> books = res.jsonPath().getList("books");
-        List<Book> books = res.jsonPath().getList("books", Book.class);
+        List<Book> books = res.getBody().getBooks();
         Assert.assertFalse(books.isEmpty());
         int idx = (int) (Math.random() * books.size());
-        //bookId = books.get(idx).get("isbn");
         bookId = books.get(idx).getIsbn();
     }
 
@@ -90,27 +87,19 @@ public class Steps {
     @When("User removes a book from his reading list")
     public void user_removes_a_book_from_his_reading_list() {
         DeleteBookRequest payload = new DeleteBookRequest(bookId, userId);
-
         res = ApiService.removeBook(payload, tokenResponse.getToken());
-        res.then()
-                .statusCode(204)
-                .log().all();
+        Assert.assertEquals(res.getStatusCode(), 204, "Expected 204 No Content");
     }
 
     @Then("The book is removed")
     public void the_book_is_removed() {
 
-        res = ApiService.getUserAccount(tokenResponse.getToken());
-        res.then()
-                .statusCode(200)
-                .log().all();
-
-//        UserAccount userAccount = res.getBody().as(UserAccount.class);
-//        List<Book> books = userAccount.getBooks();
-//        Assert.assertFalse(books.stream().anyMatch(book -> book.getIsbn().equals(bookId))); //Book should not be contained in the list post deletion
-
-        List<String> isbnList = res.jsonPath().getList("books.isbn");
-        Assert.assertFalse(isbnList.contains(bookId)); //Book should not be contained in the list post deletion
+        IRestResponse<UserAccount> res = ApiService.getUserAccount(tokenResponse.getToken());
+        Assert.assertTrue(res.isSuccessful(), "Response unsuccessful");
+        Assert.assertEquals(res.getStatusCode(), 200, "Expected 200 OK");
+        UserAccount userAccount = res.getBody();
+        List<Book> books = userAccount.getBooks();
+        Assert.assertFalse(books.stream().anyMatch(book -> book.getIsbn().equals(bookId)));
     }
 
 }

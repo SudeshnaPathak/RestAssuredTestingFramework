@@ -6,13 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserAccount {
-    private UUID userId;
-    private String username;
+public class BooksResponse {
     private List<Book> books;
 }

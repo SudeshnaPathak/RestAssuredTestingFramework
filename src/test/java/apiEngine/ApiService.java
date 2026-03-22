@@ -3,6 +3,10 @@ package apiEngine;
 import apiEngine.Model.Requests.AddBookRequest;
 import apiEngine.Model.Requests.AuthorizationRequest;
 import apiEngine.Model.Requests.DeleteBookRequest;
+import apiEngine.Model.Responses.BooksResponse;
+import apiEngine.Model.Responses.TokenResponse;
+import apiEngine.Model.Responses.UserAccount;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
@@ -15,23 +19,24 @@ public class ApiService {
 
     private static RequestSpecification requestSpec() {
         return given()
-                .contentType("application/json")
+                .contentType(ContentType.JSON)
                 .baseUri(baseUrl)
                 .relaxedHTTPSValidation();
     }
 
-    public static Response authenticateUserResponse(AuthorizationRequest authorizationRequest) {
-        return requestSpec()
+    public static IRestResponse<TokenResponse> authenticateUserResponse(AuthorizationRequest authorizationRequest) {
+        Response res = requestSpec()
                 .body(authorizationRequest)
                 .when()
                 .post(Routes.generateToken());
-
+        return new RestResponse<>(TokenResponse.class, res);
     }
 
-    public static Response getBooks() {
-        return requestSpec()
+    public static IRestResponse<BooksResponse> getBooks() {
+        Response res = requestSpec()
                 .when()
                 .get(Routes.books());
+        return new RestResponse<>(BooksResponse.class, res);
     }
 
     public static Response addBook(AddBookRequest addBookRequest, String token) {
@@ -40,6 +45,7 @@ public class ApiService {
                 .body(addBookRequest)
                 .when()
                 .post(Routes.books());
+
     }
 
     public static Response removeBook(DeleteBookRequest deleteBookRequest, String token) {
@@ -50,12 +56,14 @@ public class ApiService {
                 .delete(Routes.book());
     }
 
-    public static Response getUserAccount(String token) {
-        return requestSpec()
+    public static IRestResponse<UserAccount> getUserAccount(String token) {
+        Response res = requestSpec()
                 .auth().oauth2(token)
                 .pathParam("UUID", userId)
                 .when()
                 .get(Routes.userAccount());
+
+        return new RestResponse<>(UserAccount.class, res);
     }
 
 }
