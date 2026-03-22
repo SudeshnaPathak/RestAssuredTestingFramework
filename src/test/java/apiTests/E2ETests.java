@@ -1,6 +1,7 @@
 package apiTests;
 
 import apiEngine.Model.Book;
+import apiEngine.Model.ISBN;
 import apiEngine.Model.Requests.AddBookRequest;
 import apiEngine.Model.Requests.DeleteBookRequest;
 import io.restassured.response.Response;
@@ -10,7 +11,6 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.anyOf;
@@ -50,8 +50,8 @@ public class E2ETests extends BaseClass{
 	@Test(dependsOnMethods = {"GetBooks"})
 	public void AddBook()
 	{
-		List<Map<String, String>> collectionOfIsbns = new ArrayList<>();
-		collectionOfIsbns.add(Map.of("isbn", bookId));
+		List<ISBN> collectionOfIsbns = new ArrayList<>();
+		collectionOfIsbns.add(new ISBN(bookId));
 		AddBookRequest payload = new AddBookRequest(userId, collectionOfIsbns);
 		
 		requestSpec()

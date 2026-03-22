@@ -4,6 +4,7 @@ import apiEngine.ApiService;
 import apiEngine.ErrorResponse;
 import apiEngine.IRestResponse;
 import apiEngine.Model.Book;
+import apiEngine.Model.ISBN;
 import apiEngine.Model.Requests.AddBookRequest;
 import apiEngine.Model.Requests.AuthorizationRequest;
 import apiEngine.Model.Requests.DeleteBookRequest;
@@ -21,7 +22,6 @@ import org.testng.Assert;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static utils.ReadDataFromPropertiesFile.*;
 
@@ -66,8 +66,8 @@ public class Steps {
     @When("User adds a book to his reading list")
     public void user_adds_a_book_to_his_reading_list() {
 
-        List<Map<String, String>> collectionOfIsbns = new ArrayList<>();
-        collectionOfIsbns.add(Map.of("isbn", bookId));
+        List<ISBN> collectionOfIsbns = new ArrayList<>();
+        collectionOfIsbns.add(new ISBN(bookId));
         AddBookRequest payload = new AddBookRequest(userId, collectionOfIsbns);
         iRestResponse = ApiService.addBook(payload, tokenResponse.getToken());
     }
@@ -78,7 +78,7 @@ public class Steps {
         if (iRestResponse.isSuccessful()) {
             Assert.assertEquals(statusCode, HttpStatus.SC_CREATED, "Expected 201 Created");
             AddBookResponse addBookResponse = iRestResponse.getBody();
-            Assert.assertEquals(addBookResponse.getBooks().get(0).get("isbn"), bookId);
+            Assert.assertEquals(addBookResponse.getBooks().get(0).getIsbn(), bookId);
         } else if (statusCode == 400) {
             ErrorResponse errorResponse = iRestResponse.getErrorBody();
             Assert.assertEquals(errorResponse.getCode(), "1210", "Unexpected error code");
