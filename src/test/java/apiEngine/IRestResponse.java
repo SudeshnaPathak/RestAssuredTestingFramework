@@ -2,9 +2,11 @@ package apiEngine;
 
 import io.restassured.response.Response;
 
-public interface IRestResponse<T> {
+public interface IRestResponse<T, E> {
 
     T getBody();
+
+    E getErrorBody();
 
     String getContent();
 

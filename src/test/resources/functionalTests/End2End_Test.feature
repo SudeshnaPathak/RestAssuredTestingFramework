@@ -1,5 +1,5 @@
 Feature: End to End Tests for ToolsQA's Book Store API
-Description: The purpose of these tests are to cover End to End hppy flows for customer
+  Description: The purpose of these tests are to cover End to End happy flows for customer
 
 Background: User generates token for Authentication
 Given The user is authorized

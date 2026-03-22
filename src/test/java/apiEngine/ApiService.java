@@ -3,6 +3,7 @@ package apiEngine;
 import apiEngine.Model.Requests.AddBookRequest;
 import apiEngine.Model.Requests.AuthorizationRequest;
 import apiEngine.Model.Requests.DeleteBookRequest;
+import apiEngine.Model.Responses.AddBookResponse;
 import apiEngine.Model.Responses.BooksResponse;
 import apiEngine.Model.Responses.TokenResponse;
 import apiEngine.Model.Responses.UserAccount;
@@ -24,28 +25,28 @@ public class ApiService {
                 .relaxedHTTPSValidation();
     }
 
-    public static IRestResponse<TokenResponse> authenticateUserResponse(AuthorizationRequest authorizationRequest) {
+    public static IRestResponse<TokenResponse, ErrorResponse> authenticateUserResponse(AuthorizationRequest authorizationRequest) {
         Response res = requestSpec()
                 .body(authorizationRequest)
                 .when()
                 .post(Routes.generateToken());
-        return new RestResponse<>(TokenResponse.class, res);
+        return new RestResponse<>(TokenResponse.class, ErrorResponse.class, res);
     }
 
-    public static IRestResponse<BooksResponse> getBooks() {
+    public static IRestResponse<BooksResponse, ErrorResponse> getBooks() {
         Response res = requestSpec()
                 .when()
                 .get(Routes.books());
-        return new RestResponse<>(BooksResponse.class, res);
+        return new RestResponse<>(BooksResponse.class, ErrorResponse.class, res);
     }
 
-    public static Response addBook(AddBookRequest addBookRequest, String token) {
-        return requestSpec()
+    public static IRestResponse<AddBookResponse, ErrorResponse> addBook(AddBookRequest addBookRequest, String token) {
+        Response res = requestSpec()
                 .auth().oauth2(token)
                 .body(addBookRequest)
                 .when()
                 .post(Routes.books());
-
+        return new RestResponse<>(AddBookResponse.class, ErrorResponse.class, res);
     }
 
     public static Response removeBook(DeleteBookRequest deleteBookRequest, String token) {
@@ -56,14 +57,14 @@ public class ApiService {
                 .delete(Routes.book());
     }
 
-    public static IRestResponse<UserAccount> getUserAccount(String token) {
+    public static IRestResponse<UserAccount, ErrorResponse> getUserAccount(String token) {
         Response res = requestSpec()
                 .auth().oauth2(token)
                 .pathParam("UUID", userId)
                 .when()
                 .get(Routes.userAccount());
 
-        return new RestResponse<>(UserAccount.class, res);
+        return new RestResponse<>(UserAccount.class, ErrorResponse.class, res);
     }
 
 }

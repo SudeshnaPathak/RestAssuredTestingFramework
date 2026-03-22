@@ -12,7 +12,7 @@ public class Book {
     public String title;
     public String subTitle;
     public String author;
-    public String publish_date;
+    public String publish_date1;
     public String publisher;
     public Integer pages;
     public String description;

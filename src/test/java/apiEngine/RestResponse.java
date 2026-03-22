@@ -3,14 +3,16 @@ package apiEngine;
 import Exceptions.DeserializationException;
 import io.restassured.response.Response;
 
-public class RestResponse<T> implements IRestResponse<T> {
+public class RestResponse<T, E> implements IRestResponse<T, E> {
 
     private final Class<T> responseType;
+    private final Class<E> errorType;
     private final Response response;
     private Exception exception;
 
-    public RestResponse(Class<T> responseType, Response response) {
+    public RestResponse(Class<T> responseType, Class<E> errorType, Response response) {
         this.responseType = responseType;
+        this.errorType = errorType;
         this.response = response;
     }
 
@@ -22,7 +24,16 @@ public class RestResponse<T> implements IRestResponse<T> {
             this.exception = e;
             throw new DeserializationException("Failed to deserialize response body to " + responseType.getSimpleName(), e);
         }
+    }
 
+    @Override
+    public E getErrorBody() {
+        try {
+            return response.getBody().as(errorType);
+        } catch (Exception e) {
+            this.exception = e;
+            throw new DeserializationException("Failed to deserialize error body", e);
+        }
     }
 
     @Override
@@ -38,7 +49,7 @@ public class RestResponse<T> implements IRestResponse<T> {
     @Override
     public boolean isSuccessful() {
         int statusCode = response.getStatusCode();
-        return statusCode >= 200 && statusCode < 300;
+        return statusCode >= 200 && statusCode < 400;
     }
 
     @Override
