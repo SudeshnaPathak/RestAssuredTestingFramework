@@ -11,21 +11,27 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
+import java.util.UUID;
+
 import static io.restassured.RestAssured.given;
-import static utils.ReadDataFromPropertiesFile.baseUrl;
-import static utils.ReadDataFromPropertiesFile.userId;
 
 //abstract the logic of communication with the server into a separate class
 public class ApiService {
 
-    private static RequestSpecification requestSpec() {
+    private final String baseUrl;
+
+    public ApiService(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    private RequestSpecification requestSpec() {
         return given()
                 .contentType(ContentType.JSON)
                 .baseUri(baseUrl)
                 .relaxedHTTPSValidation();
     }
 
-    public static IRestResponse<TokenResponse, ErrorResponse> authenticateUserResponse(AuthorizationRequest authorizationRequest) {
+    public IRestResponse<TokenResponse, ErrorResponse> authenticateUserResponse(AuthorizationRequest authorizationRequest) {
         Response res = requestSpec()
                 .body(authorizationRequest)
                 .when()
@@ -33,14 +39,14 @@ public class ApiService {
         return new RestResponse<>(TokenResponse.class, ErrorResponse.class, res);
     }
 
-    public static IRestResponse<BooksResponse, ErrorResponse> getBooks() {
+    public IRestResponse<BooksResponse, ErrorResponse> getBooks() {
         Response res = requestSpec()
                 .when()
                 .get(Routes.books());
         return new RestResponse<>(BooksResponse.class, ErrorResponse.class, res);
     }
 
-    public static IRestResponse<AddBookResponse, ErrorResponse> addBook(AddBookRequest addBookRequest, String token) {
+    public IRestResponse<AddBookResponse, ErrorResponse> addBook(AddBookRequest addBookRequest, String token) {
         Response res = requestSpec()
                 .auth().oauth2(token)
                 .body(addBookRequest)
@@ -49,7 +55,7 @@ public class ApiService {
         return new RestResponse<>(AddBookResponse.class, ErrorResponse.class, res);
     }
 
-    public static Response removeBook(DeleteBookRequest deleteBookRequest, String token) {
+    public Response removeBook(DeleteBookRequest deleteBookRequest, String token) {
         return requestSpec()
                 .auth().oauth2(token)
                 .body(deleteBookRequest)
@@ -57,7 +63,7 @@ public class ApiService {
                 .delete(Routes.book());
     }
 
-    public static IRestResponse<UserAccount, ErrorResponse> getUserAccount(String token) {
+    public IRestResponse<UserAccount, ErrorResponse> getUserAccount(String token, UUID userId) {
         Response res = requestSpec()
                 .auth().oauth2(token)
                 .pathParam("UUID", userId)
@@ -66,5 +72,4 @@ public class ApiService {
 
         return new RestResponse<>(UserAccount.class, ErrorResponse.class, res);
     }
-
 }

@@ -1,6 +1,5 @@
 package stepDefinitions;
 
-import apiEngine.ApiService;
 import apiEngine.ErrorResponse;
 import apiEngine.IRestResponse;
 import apiEngine.Model.Book;
@@ -31,7 +30,7 @@ public class BookSteps extends BaseStep {
     @Given("A list of book is available")
     public void a_list_of_book_is_available() {
 
-        IRestResponse<BooksResponse, ErrorResponse> res = ApiService.getBooks();
+        IRestResponse<BooksResponse, ErrorResponse> res = getApiService().getBooks();
         Assert.assertTrue(res.isSuccessful(), "Response unsuccessful");
         Assert.assertEquals(res.getStatusCode(), HttpStatus.SC_OK, "Expected 200 OK");
 
@@ -53,7 +52,7 @@ public class BookSteps extends BaseStep {
 
         AddBookRequest payload = new AddBookRequest(userId, collectionOfIsbns);
 
-        IRestResponse<AddBookResponse, ErrorResponse> iRestResponse = ApiService.addBook(payload, token);
+        IRestResponse<AddBookResponse, ErrorResponse> iRestResponse = getApiService().addBook(payload, token);
         getScenarioContext().setContext(Context.BOOK_ADD_RESPONSE, iRestResponse);
     }
 
@@ -64,7 +63,7 @@ public class BookSteps extends BaseStep {
         Book book = (Book) getScenarioContext().getContext(Context.BOOK);
         DeleteBookRequest payload = new DeleteBookRequest(book.getIsbn(), userId);
 
-        Response res = ApiService.removeBook(payload, token);
+        Response res = getApiService().removeBook(payload, token);
 
         Assert.assertEquals(res.getStatusCode(), HttpStatus.SC_NO_CONTENT, "Expected 204 No Content");
     }

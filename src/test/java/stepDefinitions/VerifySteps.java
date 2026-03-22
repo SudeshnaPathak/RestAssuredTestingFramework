@@ -1,6 +1,5 @@
 package stepDefinitions;
 
-import apiEngine.ApiService;
 import apiEngine.ErrorResponse;
 import apiEngine.IRestResponse;
 import apiEngine.Model.Book;
@@ -43,7 +42,7 @@ public class VerifySteps extends BaseStep {
     public void the_book_is_removed() {
 
         String token = getScenarioContext().getContext(Context.ACCESS_TOKEN).toString();
-        IRestResponse<UserAccount, ErrorResponse> res = ApiService.getUserAccount(token);
+        IRestResponse<UserAccount, ErrorResponse> res = getApiService().getUserAccount(token, getConfigReader().getUserID());
 
         Assert.assertTrue(res.isSuccessful(), "Response unsuccessful");
         Assert.assertEquals(res.getStatusCode(), HttpStatus.SC_OK, "Expected 200 OK");

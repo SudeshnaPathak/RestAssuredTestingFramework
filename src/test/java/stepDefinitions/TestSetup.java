@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import static io.restassured.config.ObjectMapperConfig.objectMapperConfig;
 
-public class BaseTest {
+public class TestSetup {
     @Before
     public void setup() throws IOException {
         RestAssured.config = RestAssured.config()
